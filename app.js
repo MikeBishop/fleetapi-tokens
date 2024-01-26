@@ -4,6 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var session = require('express-session');
+var Mutex = require('async-mutex').Mutex;
+
 
 var indexRouter = require('./routes/index');
 var teslaCallbackRouter = require('./routes/tesla-callback.js');
@@ -29,7 +31,9 @@ app.use(session({
 
 var levelup = require('levelup');
 var leveldown = require('leveldown');
-app.locals.db = levelup(leveldown('/tmp/tokens'));
+app.locals.db = levelup(leveldown('/data/tokens'));
+app.locals.keyMutex = new Mutex();
+app.locals.registerMutex = new Mutex();
 
 app.use('/', indexRouter);
 app.use('/tesla-callback', teslaCallbackRouter);
@@ -50,7 +54,5 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
-require('./tesla-tokens.js').doRegister();
 
 module.exports = app;

@@ -5,6 +5,25 @@ const ADMIN_USER = process.env.ADMIN_USER;
 
 /* GET home page. */
 router.get('/', async function(req, res, next) {
+  if (!req.app.locals.registered) {
+    let error = false;
+    await req.app.locals.registerMutex.runExclusive(async ()=> {
+      if (!req.app.locals.registered) {
+        try {
+          await tesla.doRegister();
+          req.app.locals.registered = true;
+        }
+        catch (error) {
+          res.status(503);
+          res.send(error);
+          error = true;
+        }
+      }
+    });
+    if( error ) {
+      return;
+    }
+  }
   // If unauthenticated, redirect to login
   if (!req.session.user) {
     res.redirect(tesla.getAuthURL(req.session.id));
