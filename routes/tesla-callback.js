@@ -14,7 +14,7 @@ router.get('/', async function(req, res, next) {
       // Store token in database
       var db = res.app.locals.db;
       await db.put(username, token);
-      res.session.user = username;
+      req.session.user = username;
 
       res.redirect('/');
     }

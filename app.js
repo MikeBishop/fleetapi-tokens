@@ -31,7 +31,8 @@ app.use(session({
 
 var levelup = require('levelup');
 var leveldown = require('leveldown');
-app.locals.db = levelup(leveldown('/data/tokens'));
+var encoding = require('encoding-down');
+app.locals.db = levelup(encoding(leveldown('/data/tokens'), { valueEncoding: 'json'}));
 app.locals.keyMutex = new Mutex();
 app.locals.registerMutex = new Mutex();
 
