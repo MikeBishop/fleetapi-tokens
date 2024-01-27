@@ -15,7 +15,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.tesla.entrypoints=https"
-      - "traefik.http.routers.tesla.rule=Host(`tesla2.cloud.evequefou.be`)"
+      - "traefik.http.routers.tesla.rule=Host(`$CONTAINER_FQDN`)"
       - "traefik.http.routers.tesla.service=tesla"
       - "traefik.http.routers.tesla.tls.certresolver=cert"
       - "traefik.http.services.tesla.loadbalancer.server.port=3000"
