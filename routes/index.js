@@ -65,6 +65,7 @@ router.get('/', async function (req, res, next) {
     }
     else {
       // User not allowed, but was previously?
+      var username = req.session.user;
       req.session.destroy();
       res.status(403).render("error", {
         message: "Unauthorized",

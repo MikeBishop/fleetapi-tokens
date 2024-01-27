@@ -23,9 +23,7 @@ router.get('/', async function(req, res, next) {
           return;
         }
         else {
-          error = {
-            status: `${username} not in ALLOWED_USERS`
-          }
+          error = `${username} not in ALLOWED_USERS`;
         }
       }
       catch(e) {
@@ -36,7 +34,7 @@ router.get('/', async function(req, res, next) {
   // Unable to use result
   res.status(403).render("error", {
     message: "Unauthorized",
-    error: error
+    error: JSON.stringify(error)
   });
 });
 
