@@ -8,5 +8,47 @@ services:
       dockerfile: ./Dockerfile
     environment:
       NODE_ENV: production
+      CLIENT_ID: $TESLA_CLIENT_ID
+      CLIENT_SECRET: $TESLA_CLIENT_SECRET
+      DOMAIN: $CONTAINER_FQDN
+      ALLOWED_USERS: $ALLOWED_USERS
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tesla.entrypoints=https"
+      - "traefik.http.routers.tesla.rule=Host(`tesla2.cloud.evequefou.be`)"
+      - "traefik.http.routers.tesla.service=tesla"
+      - "traefik.http.routers.tesla.tls.certresolver=cert"
+      - "traefik.http.services.tesla.loadbalancer.server.port=3000"
+      - "traefik.http.services.tesla.loadbalancer.server.scheme=http"
+    volumes:
+      - tesla-tokens:/data
+
+  # Traefik to provide certificates
+  traefik:
+    container_name: traefik
+    image: traefik:latest
+    command:
+      # CLI arguments
+      - --entryPoints.http.address=:80
+      - --entryPoints.https.address=:443
+      - --entryPoints.http.http.redirections.entrypoint.to=https
+      - --entryPoints.http.http.redirections.entrypoint.scheme=https
+      - --providers.docker=true
+      - --providers.docker.endpoint=unix:///var/run/docker.sock # Use Docker Socket Proxy instead for improved security
+      - --providers.docker.exposedByDefault=false
+      # DEBUG OPTIONS
+      #- --certificatesResolvers.cert.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory # LetsEncrypt Staging Server - uncomment when testing
+      - --log=true
+      - --log.filePath=/shared/logs/traefik.log
+      #- --log.level=DEBUG
+      - --log.level=WARN
+      # Cert Retrieval options
+      - --certificatesResolvers.cert.acme.email=$EMAIL
+      - --certificatesResolvers.cert.acme.storage=/acme/linode.json
+      - --certificatesResolvers.cert.acme.tlsChallenge
     ports:
-      - 3000:3000
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # If you use Docker Socket Proxy, comment this line out
+      - ./traefik/acme:/acme # cert location - you must create this empty directory and change permissions to 600
