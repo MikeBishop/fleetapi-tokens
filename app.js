@@ -36,16 +36,17 @@ catch(e) {
 }
 
 console.log(sessionKey);
+var one_week = 1000 * 60 * 60 * 24 * 7;
 app.use(session({
   store: new FileStore({
     path: '/data/sessions',
-    ttl: 3600
+    ttl: one_week
   }),
   secret: sessionKey,
   saveUninitialized: true,
   resave: false,
   cookie: {
-    maxAge: 1000 * 60 * 60 * 24 * 7
+    maxAge: one_week
   }
 }));
 
