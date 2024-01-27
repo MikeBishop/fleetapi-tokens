@@ -1,5 +1,56 @@
-extends layout
+extends layout.pug
 
 block content
-  h1= title
-  p Welcome to #{title}
+  h1=title
+
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      function copyToClipboard(id) {
+        var textElement = document.getElementById(id);
+        var range = document.createRange();
+        range.selectNodeContents(textElement);
+        var selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        try {
+          document.execCommand('copy');
+        } catch (err) {
+          console.error('Unable to copy to clipboard', err);
+        }
+
+        selection.removeAllRanges();
+      }
+
+
+      function setupCopyButton(id) {
+        var button = document.getElementById(id + '-button');
+        button.addEventListener('click', function() {
+          copyToClipboard(id);
+        });
+      }
+
+      setupCopyButton('client-id');
+      setupCopyButton('access-token');
+      setupCopyButton('refresh-token');
+    })
+
+  .string-container
+    label(for="client-id") CLIENT_ID:
+    p#client-id= CLIENT_ID
+    button(id="client-id-button") Copy
+
+  .string-container
+    label(for="access-token") Access Token:
+    p#access-token=access_token
+    button(id="access-token-button") Copy
+
+  .string-container
+    label(for="refresh-token") Refresh Token:
+    p#refresh-token=refresh_token
+    button(id="refresh-token-button") Copy
+
+  .string-container
+    label(for="expiration-time") Expiration Time:
+    p#expiration-time=new Date(expiration * 1000).toLocaleString()
+    p#formatted-expiration-time 

@@ -1,32 +1,43 @@
 var express = require('express');
 var router = express.Router();
 var tesla = require("../tesla-tokens");
+const ALLOWED_USERS = process.env.ALLOWED_USERS || "";
 
 /* Tesla callback from OAuth flow. */
 router.get('/', async function(req, res, next) {
-  if( req.session.id == req.query.state ) {
-    // State matches, continue
-    if( req.query.code ) {
+  var error = null;
+  if( req.session.id == req.query.state && req.query.code ) {
       // Code is present, exchange for token
-      var token = await tesla.doTokenExchange(req.query.code);
-      var username = await tesla.getUsername(token.access_token);
+      try {
+        var token = await tesla.doTokenExchange(req.query.code);
+        var username = await tesla.getUsername(token.access_token);
 
-      // Store token in database
-      var db = res.app.locals.db;
-      await db.put(username, token);
-      req.session.user = username;
+        if( ALLOWED_USERS.split(/[ ,;]+/).includes(username)) {
+          // Store token in database
+          var db = res.app.locals.db;
+          await db.put(username, token);
+          req.session.user = username;
+          await req.session.saveAsync();
 
-      res.redirect('/');
-    }
-    else {
-      // Code is not present, redirect to home page and try again
-      res.redirect('/');
-    }
+          res.redirect('/');
+          return;
+        }
+        else {
+          error = {
+            status: `${username} not in ALLOWED_USERS`
+          }
+        }
+      }
+      catch(e) {
+        error = e;
+      }
   }
-  else{
-    // State does not match, redirect to home page
-    res.status(401).send("State does not match");
-  }
+
+  // Unable to use result
+  res.status(403).render("error", {
+    message: "Unauthorized",
+    error: error
+  });
 });
 
 module.exports = router;

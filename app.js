@@ -4,7 +4,10 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var session = require('express-session');
+var FileStore = require('session-file-store')(session);
 var Mutex = require('async-mutex').Mutex;
+var fs = require('fs');
+var util = require('util');
 
 
 var indexRouter = require('./routes/index');
@@ -22,17 +25,36 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+var sessionKey;
+try {
+  sessionKey = fs.readFileSync('/data/session_key', 'utf8').trim();
+}
+catch(e) {
+  sessionKey = require('crypto').randomBytes(64).toString('hex');
+  fs.writeFileSync('/data/session_key', sessionKey, 'utf8');
+}
+
+console.log(sessionKey);
 app.use(session({
-  // Note that the secret is regenerated every time the server restarts.
-  secret: require('crypto').randomBytes(64).toString('hex'),
+  store: new FileStore({
+    path: '/data/sessions',
+    ttl: 3600
+  }),
+  secret: sessionKey,
   saveUninitialized: true,
-  resave: true
+  resave: false
 }));
 
-var levelup = require('levelup');
-var leveldown = require('leveldown');
-var encoding = require('encoding-down');
-app.locals.db = levelup(encoding(leveldown('/data/tokens'), { valueEncoding: 'json'}));
+app.use((req, res, next) => {
+  req.session.saveAsync = util.promisify(req.session.save.bind(req.session));
+  next();
+})
+
+const { ClassicLevel } = require('classic-level');
+var level = new ClassicLevel('/data/tokens', { valueEncoding: 'json'});
+app.locals.db = level;
+
 app.locals.keyMutex = new Mutex();
 app.locals.registerMutex = new Mutex();
 

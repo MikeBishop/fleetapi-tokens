@@ -1,8 +1,39 @@
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-color: #111;
+  color: #d4af37;
 }
 
 a {
   color: #00B7FF;
+}
+
+.string-container {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  position: relative;
+  overflow-wrap: anywhere;
+}
+
+.label {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  font-weight: bold;
+}
+
+.copy-button {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+}
+
+@media (max-width: 600px) {
+  .copy-button {
+    position: static;
+    margin-top: 5px;
+    /* Add space between the text and the button */
+  }
 }
