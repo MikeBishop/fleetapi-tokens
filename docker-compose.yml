@@ -1,11 +1,8 @@
 version: '3.4'
 
 services:
-  teslatokenproxy:
-    image: teslatokenproxy
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+  fleetapi-tokens:
+    image: ghcr.io/MikeBishop/fleetapi-tokens
     environment:
       NODE_ENV: production
       CLIENT_ID: $TESLA_CLIENT_ID
@@ -21,7 +18,7 @@ services:
       - "traefik.http.services.tesla.loadbalancer.server.port=3000"
       - "traefik.http.services.tesla.loadbalancer.server.scheme=http"
     volumes:
-      - tesla-tokens:/data
+      - fleetapi-tokens:/data
 
   # Traefik to provide certificates
   traefik:
@@ -36,15 +33,11 @@ services:
       - --providers.docker=true
       - --providers.docker.endpoint=unix:///var/run/docker.sock # Use Docker Socket Proxy instead for improved security
       - --providers.docker.exposedByDefault=false
-      # DEBUG OPTIONS
+      # For debug use
       #- --certificatesResolvers.cert.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory # LetsEncrypt Staging Server - uncomment when testing
-      - --log=true
-      - --log.filePath=/shared/logs/traefik.log
-      #- --log.level=DEBUG
-      - --log.level=WARN
       # Cert Retrieval options
-      - --certificatesResolvers.cert.acme.email=$EMAIL
-      - --certificatesResolvers.cert.acme.storage=/acme/linode.json
+      - --certificatesResolvers.cert.acme.email=$LETSENCRYPT_EMAIL
+      - --certificatesResolvers.cert.acme.storage=/acme/acme.json
       - --certificatesResolvers.cert.acme.tlsChallenge
     ports:
       - "80:80"

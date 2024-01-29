@@ -64,3 +64,4 @@ Configuration is read from environment variables:
   vehicle_charging_cmds energy_device_data energy_cmds offline_access`). Note
   that `openid user_data offline_access` are required for proper functioning of
   this app.
+- LETSENCRYPT_EMAIL is used by Traefik to create a certificate.
