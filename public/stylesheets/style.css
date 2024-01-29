@@ -37,3 +37,19 @@ a {
     /* Add space between the text and the button */
   }
 }
+
+.conditional-links {
+  text-align: center;
+  font-size: 0.9em;
+  /* Adjust the text size as needed */
+}
+
+.link {
+  margin-right: 10px;
+  /* Add some space between the links */
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}

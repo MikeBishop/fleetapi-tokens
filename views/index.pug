@@ -54,3 +54,9 @@ block content
     label(for="expiration-time") Expiration Time:
     p#expiration-time=new Date(expiration * 1000).toLocaleString()
     p#formatted-expiration-time 
+
+  .conditional-links
+    a(href=".well-known/appspecific/com.tesla.3p.public-key.pem" class="link") Public Key
+
+    if showPrivateKey
+      a(href=".well-known/appspecific/com.tesla.3p.private-key.pem" class="link") Private Key

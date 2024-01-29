@@ -15,7 +15,7 @@ In order to get tokens usable with Tesla's Fleet API, you will need to:
 - Obtain a domain name, if you don't already have one. (This needs to be a
   domain you completely control, not just a subdomain on a shared parent
   domain.)
-- Deploy this container so that Your domain registered above, or a subdomain of
+- Deploy this container so that your domain registered above, or a subdomain of
   it (e.g. `https://tesla.example.com`) points to it with ports 80 and 443
   exposed. Make sure you can access it over HTTPS with a valid certificate.
 - Register for a [developer account](https://developer.tesla.com) at Tesla
@@ -52,7 +52,9 @@ Configuration is read from environment variables:
 - ALLOWED_USERS is a comma- or semicolon-separated list of e-mail addresses for
   Tesla accounts allowed to obtain tokens. For example, `elon@tesla.com,
   alice@example.com`. (The "Profile Information" scope is used to check the
-  e-mail address of users who attempt to log in.)
+  e-mail address of users who attempt to log in.) The first user in the list is
+  also allowed to download the private key enrolled for sending commands to the
+  vehicles.
 - CLIENT_ID is your Tesla Client ID, provided after registering an application
   on the Developer portal.
 - CLIENT_SECRET is your Tesla Client Secret, provided after registering an
