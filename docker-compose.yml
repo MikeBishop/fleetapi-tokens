@@ -44,7 +44,8 @@ services:
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro # If you use Docker Socket Proxy, comment this line out
-      - ./traefik/acme:/acme # cert location - you must create this empty directory and change permissions to 600
+      - traefik-certs:/acme
       
 volumes:
   fleetapi-tokens:
+  traefik-certs:
