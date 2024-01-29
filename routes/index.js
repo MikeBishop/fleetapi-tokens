@@ -6,6 +6,16 @@ const CLIENT_ID = process.env.CLIENT_ID;
 
 /* GET home page. */
 router.get('/', async function (req, res, next) {
+  if( !CLIENT_ID ) {
+    res.status(200);
+    res.render("error", {
+      title: "Container is running",
+      message: "Up and running",
+      error: "Need the Tesla client ID to do anything useful, but make sure TLS works here first."
+    });
+    return;
+  }
+
   if (!req.app.locals.registered) {
     let error = false;
     await req.app.locals.registerMutex.runExclusive(async () => {
@@ -28,6 +38,7 @@ router.get('/', async function (req, res, next) {
       return;
     }
   }
+
   // If unauthenticated, redirect to login
   if (!req.session.user) {
     res.redirect(tesla.getAuthURL(req.session.id));

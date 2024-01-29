@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   fleetapi-tokens:
-    image: ghcr.io/MikeBishop/fleetapi-tokens
+    image: ghcr.io/mikebishop/fleetapi-tokens
     environment:
       NODE_ENV: production
       CLIENT_ID: $TESLA_CLIENT_ID
@@ -45,3 +45,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro # If you use Docker Socket Proxy, comment this line out
       - ./traefik/acme:/acme # cert location - you must create this empty directory and change permissions to 600
+      
+volumes:
+  fleetapi-tokens:

@@ -15,16 +15,19 @@ In order to get tokens usable with Tesla's Fleet API, you will need to:
 - Obtain a domain name, if you don't already have one. (This needs to be a
   domain you completely control, not just a subdomain on a shared parent
   domain.)
+- Deploy this container so that Your domain registered above, or a subdomain of
+  it (e.g. `https://tesla.example.com`) points to it with ports 80 and 443
+  exposed. Make sure you can access it over HTTPS with a valid certificate.
 - Register for a [developer account](https://developer.tesla.com) at Tesla
 - Submit an application for approval with the following settings:
-  - Allowed origin(s): Your domain registered above, or a subdomain of it; e.g.
-    https://tesla.example.com
+  - Allowed origin(s): The hostname pointing at the container, e.g.
+    `https://tesla.example.com`.
   - Allowed redirect URI(s): The same origin with a path of `/tesla-callback`,
-    e.g. https://tesla.example.com/tesla-callback
+    e.g. `https://tesla.example.com/tesla-callback`
   - Scopes: Whatever permissions your application(s) will require. This service
     requires at least the "Profile Information" scope for user authentication.
-- Deploy this container so that your allowed origin points to it (e.g. at
-  https://tesla.example.com), with ports 80 and 443 exposed.
+- Go back to the container and re-launch with the Client ID and Client Secret
+  you got from Tesla.
 
 ## Deployment Notes
 
@@ -37,6 +40,10 @@ This service MUST be accessible from the Internet, but does not need to remain
 up continuously. It can be hosted at home using dynamic DNS if port 443 is
 available, or on your favorite cloud hosting provider. (Linode, Azure, Amazon
 EC2, etc.)
+
+The container requests "offline access," meaning it receives refresh tokens as
+well as access tokens. These refresh tokens can be used by applications directly
+without needing to communicate with this container.
 
 ## Configuration
 
