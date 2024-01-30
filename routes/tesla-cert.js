@@ -2,20 +2,16 @@ var express = require('express');
 var router = express.Router();
 var fs = require("fs/promises");
 var crypto = require("crypto");
+const ALLOWED_USERS = process.env.ALLOWED_USERS || "";
+const pubkey_file = "/data/keypair_pub.pem";
+const privkey_file = "/data/keypair_priv.pem";
 
-
-/* Tesla callback from OAuth flow. */
-router.get('/com.tesla.3p.public-key.pem', async function(req, res, next) {
-  await req.app.locals.keyMutex.runExclusive(async () => {
-    // - If cert doesn't exist, generate EC keypair using the secp256r1 curve
-    //   (prime256v1) and write to disk
-    const pubkey_file = "/data/keypair_pub.pem";
-    const privkey_file = "/data/keypair_priv.pem";
-
+async function readOrGenerateKeypair(mutex, wantPublic) {
+  var result;
+  await mutex.runExclusive(async () => {
     try {
-      // Try to read the public key file
-      const pubkey = await fs.readFile(pubkey_file);
-      res.send(pubkey);
+      // Try to read the requested key file
+      result = await fs.readFile(wantPublic ? pubkey_file : privkey_file, 'utf-8');
       return;
     } catch (error) { }
 
@@ -33,21 +29,58 @@ router.get('/com.tesla.3p.public-key.pem', async function(req, res, next) {
     });
 
     // Write the keypair to disk
-    try {
-      await fs.writeFile(pubkey_file, keypair.publicKey);
-      await fs.writeFile(privkey_file, keypair.privateKey);
+    //
+    // Caller will need to catch errors here
+    await Promise.all([
+      fs.writeFile(pubkey_file, keypair.publicKey, 'utf-8'),
+      fs.writeFile(privkey_file, keypair.privateKey, 'utf-8')
+    ]);
+    result = wantPublic ? keypair.publicKey : keypair.privateKey;
+  });
+  return result;
+}
 
-      // If successfully saved, return public key in PEM format
-      res.send(keypair.publicKey);
+/* Tesla callback from Register flow. */
+router.get('/com.tesla.3p.public-key.pem', async function (req, res, next) {
+
+  // Retrieve and return public key
+  try {
+    var pubkey = await readOrGenerateKeypair(req.app.locals.keyMutex, true);
+    return res.
+      setHeader("content-type", "application/x-pem-file").
+      send(pubkey);
+  } catch (error) {
+    console.log(error);
+  }
+
+  // If failed, return 404
+  res.status(404);
+  res.send("Not Found");
+});
+
+router.get('/com.tesla.3p.private-key.pem', async function (req, res, next) {
+  if (req.session.user && ALLOWED_USERS.split(/[ ,;]+/)[0] == req.session.user) {
+    // Only the primary user is allowed to download the private key
+    try {
+      res.
+        setHeader("content-type", "application/x-pem-file").
+        send(await readOrGenerateKeypair(req.app.locals.keyMutex, false));
       return;
     } catch (error) {
       console.log(error);
     }
-
-    // If failed, return 404
-    res.status(404);
-    res.send("Not Found");
-  });
+  }
+  else if (req.session.user) {
+    res.status(403);
+    res.render("error", {
+      message: "Unauthorized",
+      error: `${req.session.user} not allowed to download private key.`
+    });
+    return;
+  }
+  else {
+    res.redirect(tesla.getAuthURL(req.session.id));
+  }
 });
 
 module.exports = router;

@@ -48,7 +48,8 @@ router.get('/', async function (req, res, next) {
     //   - Refresh token if needed
     //   - Show token
 
-    if (ALLOWED_USERS.split(/[ ,;]+/).includes(req.session.user)) {
+    const allowed_users = ALLOWED_USERS.split(/[ ,;]+/);
+    if (allowed_users.includes(req.session.user)) {
       var db = res.app.locals.db;
       var userToken = await db.get(req.session.user);
 
@@ -66,7 +67,8 @@ router.get('/', async function (req, res, next) {
           user: req.session.user,
           access_token: userToken.access_token,
           refresh_token: userToken.refresh_token,
-          expiration: userToken.expiration
+          expiration: userToken.expiration,
+          showPrivateKey: req.session.user == allowed_users[0]
         });
       }
       else {
