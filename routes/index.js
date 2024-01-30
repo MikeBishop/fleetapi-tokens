@@ -3,15 +3,26 @@ var router = express.Router();
 var tesla = require('../tesla-tokens.js');
 const ALLOWED_USERS = process.env.ALLOWED_USERS || "";
 const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
 
 /* GET home page. */
 router.get('/', async function (req, res, next) {
-  if( !CLIENT_ID ) {
+  if (!ALLOWED_USERS) {
+    return res.
+      status(500).
+      render("error", {
+        title: "Configuration error",
+        message: "Configuration error",
+        error: "No users allowed to use this service; set ALLOWED_USERS."
+      });
+  }
+
+  if( !CLIENT_ID || !CLIENT_SECRET ) {
     res.status(200);
     res.render("error", {
       title: "Container is running",
       message: "Up and running",
-      error: "Need the Tesla client ID to do anything useful, but make sure TLS works here first."
+      error: "Need the Tesla client ID and secret to do anything useful, but make sure TLS works here first."
     });
     return;
   }
@@ -63,7 +74,7 @@ router.get('/', async function (req, res, next) {
         }
         res.render('index', {
           CLIENT_ID: CLIENT_ID,
-          title: 'Tesla Token Proxy',
+          title: 'Fleet API Tokens',
           user: req.session.user,
           access_token: userToken.access_token,
           refresh_token: userToken.refresh_token,
