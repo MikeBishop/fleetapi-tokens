@@ -31,17 +31,19 @@ async function readOrGenerateKeypair(mutex, wantPublic) {
     // Write the keypair to disk
     //
     // Caller will need to catch errors here
-    await fs.writeFile(pubkey_file, keypair.publicKey, 'utf-8');
-    await fs.writeFile(privkey_file, keypair.privateKey, 'utf-8');
+    await Promise.all([
+      fs.writeFile(pubkey_file, keypair.publicKey, 'utf-8'),
+      fs.writeFile(privkey_file, keypair.privateKey, 'utf-8')
+    ]);
     result = wantPublic ? keypair.publicKey : keypair.privateKey;
   });
   return result;
 }
 
-/* Tesla callback from OAuth flow. */
+/* Tesla callback from Register flow. */
 router.get('/com.tesla.3p.public-key.pem', async function (req, res, next) {
 
-  // If successfully saved, return public key in PEM format
+  // Retrieve and return public key
   try {
     var pubkey = await readOrGenerateKeypair(req.app.locals.keyMutex, true);
     return res.
