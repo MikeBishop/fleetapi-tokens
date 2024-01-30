@@ -24,6 +24,26 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+const DOMAIN = process.env.DOMAIN;
+app.use((req, res, next) => {
+  if( !DOMAIN ) {
+    return res.
+      status(500).
+      render("error", {
+        message: "Configuration error",
+        error: "No DOMAIN environment variable set"
+      });
+  }
+  // Redirect to correct hostname with HTTPS
+  else if (req.hostname !== DOMAIN) {
+    return res.redirect(301, `https://${DOMAIN}${req.originalUrl}`);
+  }
+  else {
+    return next();
+  }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 var sessionKey;
