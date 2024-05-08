@@ -115,15 +115,15 @@ async function doRefresh(refresh_token) {
         });
         var json = await request.json();
         if (!request.ok) {
-            console.log(json);
-            throw json;
+            err = new Error(`${request.status}: ${JSON.stringify(json)}`)
+            throw err;
         }
+        json.expiration = Math.floor(Date.now() / 1000) + json.expires_in;
+        return json;
     } catch (error) {
         console.log(error);
         throw error;
     }
-    json.expiration = Math.floor(Date.now() / 1000) + json.expires_in;
-    return json;
 }
 
 async function getUsername(token) {

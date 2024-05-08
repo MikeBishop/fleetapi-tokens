@@ -68,9 +68,24 @@ router.get('/', async function (req, res, next) {
         // Check if token is expired / near expiration
         if (userToken.expiration < (Date.now() / 1000) + 3600) {
           // Renew token
-          var newToken = await tesla.doRefresh(userToken.refresh_token);
-          userToken = newToken;
-          await db.put(req.session.user, userToken);
+          try {
+            var newToken = await tesla.doRefresh(userToken.refresh_token);
+            userToken = newToken;
+            await db.put(req.session.user, userToken);
+          }
+          catch (e) {
+            if( e.message.startsWith("401") ) {
+              // Token is invalid, redirect to login
+              return res.redirect(tesla.getAuthURL(req.session.id));
+            }
+            else {
+              res.status(503);
+              return res.render("error", {
+                message: "Failed to refresh token",
+                error: e.message
+              });
+            }
+          }
         }
         res.render('index', {
           CLIENT_ID: CLIENT_ID,
