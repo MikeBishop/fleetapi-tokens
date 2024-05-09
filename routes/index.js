@@ -4,6 +4,7 @@ var tesla = require('../tesla-tokens.js');
 const ALLOWED_USERS = process.env.ALLOWED_USERS || "";
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
+const DOMAIN = process.env.DOMAIN;
 
 /* GET home page. */
 router.get('/', async function (req, res, next) {
@@ -68,9 +69,24 @@ router.get('/', async function (req, res, next) {
         // Check if token is expired / near expiration
         if (userToken.expiration < (Date.now() / 1000) + 3600) {
           // Renew token
-          var newToken = await tesla.doRefresh(userToken.refresh_token);
-          userToken = newToken;
-          await db.put(req.session.user, userToken);
+          try {
+            var newToken = await tesla.doRefresh(userToken.refresh_token);
+            userToken = newToken;
+            await db.put(req.session.user, userToken);
+          }
+          catch (e) {
+            if( e.message.startsWith("401") ) {
+              // Token is invalid, redirect to login
+              return res.redirect(tesla.getAuthURL(req.session.id));
+            }
+            else {
+              res.status(503);
+              return res.render("error", {
+                message: "Failed to refresh token",
+                error: e.message
+              });
+            }
+          }
         }
         res.render('index', {
           CLIENT_ID: CLIENT_ID,
@@ -79,7 +95,8 @@ router.get('/', async function (req, res, next) {
           access_token: userToken.access_token,
           refresh_token: userToken.refresh_token,
           expiration: userToken.expiration,
-          showPrivateKey: req.session.user == allowed_users[0]
+          showPrivateKey: req.session.user == allowed_users[0],
+          domain: DOMAIN
         });
       }
       else {

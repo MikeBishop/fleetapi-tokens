@@ -4,7 +4,7 @@ const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const AUDIENCE = process.env.AUDIENCE || "https://fleet-api.prd.na.vn.cloud.tesla.com";
 const LOCALE = process.env.LOCALE || "en-US";
 const DOMAIN = process.env.DOMAIN;
-const SCOPE = process.env.SCOPE || "openid user_data vehicle_device_data vehicle_cmds vehicle_charging_cmds	energy_device_data energy_cmds offline_access";
+const SCOPE = process.env.SCOPE || "openid user_data vehicle_device_data vehicle_cmds vehicle_charging_cmds energy_device_data energy_cmds offline_access";
 const REDIRECT_URL = "https://" + DOMAIN + "/tesla-callback";
 
 
@@ -115,15 +115,15 @@ async function doRefresh(refresh_token) {
         });
         var json = await request.json();
         if (!request.ok) {
-            console.log(json);
-            throw json;
+            err = new Error(`${request.status}: ${JSON.stringify(json)}`)
+            throw err;
         }
+        json.expiration = Math.floor(Date.now() / 1000) + json.expires_in;
+        return json;
     } catch (error) {
         console.log(error);
         throw error;
     }
-    json.expiration = Math.floor(Date.now() / 1000) + json.expires_in;
-    return json;
 }
 
 async function getUsername(token) {
