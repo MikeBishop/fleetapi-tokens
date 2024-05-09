@@ -4,7 +4,7 @@ const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const AUDIENCE = process.env.AUDIENCE || "https://fleet-api.prd.na.vn.cloud.tesla.com";
 const LOCALE = process.env.LOCALE || "en-US";
 const DOMAIN = process.env.DOMAIN;
-const SCOPE = process.env.SCOPE || "openid user_data vehicle_device_data vehicle_cmds vehicle_charging_cmds	energy_device_data energy_cmds offline_access";
+const SCOPE = process.env.SCOPE || "openid user_data vehicle_device_data vehicle_cmds vehicle_charging_cmds energy_device_data energy_cmds offline_access";
 const REDIRECT_URL = "https://" + DOMAIN + "/tesla-callback";
 
 
