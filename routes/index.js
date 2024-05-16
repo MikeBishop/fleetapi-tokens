@@ -67,7 +67,7 @@ router.get('/', async function (req, res, next) {
 
       if (userToken) {
         // Check if token is expired / near expiration
-        if (userToken.expiration < (Date.now() / 1000) + 3600) {
+        if (userToken.expiration < (Date.now() / 1000) + 3600 || req.query.refresh ) {
           // Renew token
           try {
             var newToken = await tesla.doRefresh(userToken.refresh_token);
