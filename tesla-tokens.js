@@ -11,7 +11,7 @@ const REDIRECT_URL = "https://" + DOMAIN + "/tesla-callback";
 async function getPartnerToken() {
     try {
         var response = await fetch(
-            'https://auth.tesla.com/oauth2/v3/token',
+            'https://fleet-auth.prd.vn.cloud.tesla.com/oauth2/v3/token',
             {
                 method: 'POST',
                 headers: {
@@ -39,7 +39,7 @@ async function getPartnerToken() {
 }
 
 function getAuthURL(state) {
-    return "https://auth.tesla.com/oauth2/v3/authorize?" + new URLSearchParams({
+    return "https://fleet-auth.prd.vn.cloud.tesla.com/oauth2/v3/authorize?" + new URLSearchParams({
         client_id: CLIENT_ID,
         locale: LOCALE,
         prompt: "login",
@@ -54,7 +54,7 @@ function getAuthURL(state) {
 // refresh_token if scope allows).
 async function doTokenExchange(code) {
     try {
-        var request = await fetch("https://auth.tesla.com/oauth2/v3/token", {
+        var request = await fetch("https://fleet-auth.prd.vn.cloud.tesla.com/oauth2/v3/token", {
             method: "POST",
             body: new URLSearchParams({
                 grant_type: "authorization_code",
@@ -105,7 +105,7 @@ async function doRegister() {
 
 async function doRefresh(refresh_token) {
     try {
-        var request = await fetch("https://auth.tesla.com/oauth2/v3/token", {
+        var request = await fetch("https://fleet-auth.prd.vn.cloud.tesla.com/oauth2/v3/token", {
             method: 'POST',
             body: new URLSearchParams({
                 grant_type: "refresh_token",
