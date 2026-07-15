@@ -63,7 +63,18 @@ router.get('/', async function (req, res, next) {
     const allowed_users = ALLOWED_USERS.split(/[ ,;]+/);
     if (allowed_users.includes(req.session.user)) {
       var db = res.app.locals.db;
-      var userToken = await db.get(req.session.user);
+      var userToken;
+      try {
+        userToken = await db.get(req.session.user);
+      } catch (e) {
+        if (e.code !== 'LEVEL_NOT_FOUND') {
+          res.status(503);
+          return res.render("error", {
+            message: "Failed to read stored token",
+            error: e.message
+          });
+        }
+      }
 
       if (userToken) {
         // Check if token is expired / near expiration

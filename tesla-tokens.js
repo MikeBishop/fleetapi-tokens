@@ -33,7 +33,7 @@ async function getPartnerToken() {
         }
     } catch (error) {
         console.log(error);
-        process.exit(1);
+        throw error;
     }
     return json.access_token;
 }
